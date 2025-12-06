@@ -1,0 +1,11 @@
+{% for seat in seats %}
+  {% if seat.id in booked_seat_ids %}
+  <div class="seat occupied" data-seat-id="" style="cursor: not-allowed;">
+    <span class="seat-number">{{ seat.room.name }}{% if seat.seat_number < 10 %}0{% endif %}{{ seat.seat_number }}</span>
+  </div>
+  {% else %}
+  <div class="seat" data-seat-id="{{ seat.id }}">
+    <span class="seat-number">{{ seat.room.name }}{% if seat.seat_number < 10 %}0{% endif %}{{ seat.seat_number }}</span>
+  </div>
+  {% endif %}
+{% endfor %}

@@ -1,0 +1,258 @@
+{% load crispy_forms_tags %}
+<div class="modal fade" id="bookingModal{{ movie.id }}" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookingModalLabel">Đặt Vé Xem Phim</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="text-white">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Biểu đồ chỗ ngồi -->
+                <div class="seat-chart">
+                    <div class="screen"></div>
+                    <div class="row m-3 seats" id="seat-buttons{{ movie.id }}"></div>
+                    <ul class="showcase">
+                        <li>
+                          <div class="case"></div>
+                          <small>Ghế trống</small>
+                        </li>
+                        <li>
+                          <div class="case selected "></div>
+                          <small>Đã chọn</small>
+                        </li>
+                        <li>
+                          <div class="case occupied"></div>
+                          <small>Đã được đặt</small>
+                        </li>
+                    </ul> 
+                </div>
+                <!-- Form đặt vé -->
+                <form id="bookingForm{{ movie.id }}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="movieSelection">Phim:</label>
+                        <input type="text" class="form-control" value="{{ movie.title }}" disabled>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12 mb-0" id="showtimeSelection{{ movie.id }}">
+                            <label for="showtime{{ movie.id }}">Chọn suất chiếu:</label>
+                            <select class="form-control" id="showtime{{ movie.id }}" name="showtime{{ movie.id }}" required>
+                                <option value="">-- Chọn suất chiếu --</option>
+                                {% for showtime in showtimes %}
+                                <option value="{{ showtime.id }}" 
+                                    data-room-id="{{ showtime.room.id }}"
+                                    data-room-name="{{ showtime.room.name }}"
+                                    data-start-time="{{ showtime.start_time|date:'d/m/Y H:i' }}"
+                                    data-available-seats="{{ showtime.get_available_seats_count }}">
+                                    {{ showtime.room.name }} - {{ showtime.start_time|date:"d/m/Y H:i" }} (Còn {{ showtime.get_available_seats_count }} ghế)
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6 mb-0" id="typeSelection{{ movie.id }}">
+                            {{ form.type|as_crispy_field }}
+                        </div>
+                        <div class="form-group col-md-6 mb-0">
+                            <label>Giá vé:</label>
+                            <input type="text" class="form-control" id="price{{ movie.id }}" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6 mb-0" id="quantitySelection{{ movie.id }}">
+                            <label>Số lượng vé:</label>
+                            <input type="number" class="form-control" name="quantity{{ movie.id }}" value="1" min="1" max="99">
+                        </div>
+                        <div class="form-group col-md-6 mb-0">
+                            <label>Tổng tiền:</label>
+                            <input type="text" class="form-control" id="totalPrice{{ movie.id }}" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="form-row mt-2">
+                        <button type="submit" class="btn btn-primary m-2" id="bookingButton{{ movie.id }}">Đặt vé</button>
+                        <button type="button" class="btn btn-primary m-2" data-dismiss="modal">Hủy</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <div id="bookingError{{ movie.id }}"></div> 
+            </div>
+        </div>
+    </div>
+</div>
+<!-- JavaScript để xử lý chọn chỗ và đặt vé -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+$(document).ready(function() {
+    var movie_id = "{{ movie.id }}";
+    $("#showtime{{ movie.id }}").change(function() {
+        var url = "{% url 'get_seats' %}";
+        var showtimeId = $(this).val(); 
+        if (!showtimeId) {
+            $("#seat-buttons{{ movie.id }}").html('');
+            return;
+        }
+        console.log("Showtime ID:", showtimeId);
+        $.ajax({
+            url: url,
+            data: {
+                showtime_id: showtimeId 
+            },
+            success: function (data) {
+                $("#seat-buttons{{ movie.id }}").html(data);
+            },
+            error: function() {
+                $("#seat-buttons{{ movie.id }}").html('<p class="text-danger">Lỗi khi tải danh sách ghế</p>');
+            }
+        });
+    });
+    
+    // Hàm tính giá vé
+    function updatePrice{{ movie.id }}() {
+        var typeSelect = $("#typeSelection{{ movie.id }} select, #id_type{{ movie.id }}");
+        var type = typeSelect.val();
+        
+        if (!type) {
+            $("#price{{ movie.id }}").val('');
+            $("#totalPrice{{ movie.id }}").val('');
+            return;
+        }
+        
+        var price = (type === 'Adult') ? 100000 : 50000;
+        var formattedPrice = price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+        $("#price{{ movie.id }}").val(formattedPrice);
+        
+        var quantity = parseInt($("input[name='quantity{{ movie.id }}']").val()) || 1;
+        var totalPrice = quantity * price;
+        var formattedTotalPrice = totalPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+        $("#totalPrice{{ movie.id }}").val(formattedTotalPrice);
+    }
+    
+    // Xử lý khi thay đổi loại vé - sử dụng event delegation
+    $(document).on('change', '#typeSelection{{ movie.id }} select, #id_type{{ movie.id }}', function() {
+        updatePrice{{ movie.id }}();
+    });
+    
+    // Xử lý khi thay đổi số lượng vé
+    $("input[name='quantity{{ movie.id }}']").on('change input', function() {
+        updatePrice{{ movie.id }}();
+    });
+    
+    // Tính giá khi modal được mở (nếu đã chọn loại vé)
+    $('#bookingModal{{ movie.id }}').on('shown.bs.modal', function() {
+        setTimeout(function() {
+            updatePrice{{ movie.id }}();
+        }, 100);
+    });
+
+    $("#seat-buttons{{ movie.id }}").on("click", ".seat", function() {
+        // Kiểm tra xem ghế có bị occupied không
+        if ($(this).hasClass("occupied")) {
+            alert("Ghế này đã được đặt!");
+            return;
+        }
+
+        var selectedSeatIds = [];
+        var quantity = parseInt($("input[name='quantity{{ movie.id }}']").val()) || 1;
+
+        // Lấy tất cả ghế đã chọn (không bao gồm ghế đang click)
+        $(".seat.selected").each(function() {
+            var seatId = $(this).data("seat-id");
+            if (seatId) {
+                selectedSeatIds.push(seatId);
+            }
+        });
+
+        var seatId = $(this).data("seat-id");
+        if (!seatId) {
+            return; // Không có seat-id, không xử lý
+        }
+
+        var index = $.inArray(seatId, selectedSeatIds);
+
+        if (index !== -1) {
+            // Ghế đã được chọn, bỏ chọn
+            $(this).removeClass("selected");
+            selectedSeatIds.splice(index, 1);
+        } else {
+            // Ghế chưa được chọn, kiểm tra số lượng trước khi thêm
+            if (selectedSeatIds.length >= quantity) { 
+                alert("Bạn chỉ có thể chọn tối đa " + quantity + " ghế!");
+                return;
+            }
+            $(this).addClass("selected");
+            selectedSeatIds.push(seatId);
+        }
+
+        console.log("Selected Seat IDs:", selectedSeatIds);
+        console.log("Quantity:", quantity);
+    });
+    // Xử lý sự kiện khi submit biểu mẫu
+    $("#bookingForm{{ movie.id }}").submit(function(event) {
+        event.preventDefault(); // Ngăn chặn việc gửi biểu mẫu mặc định
+        var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+        var showtimeId = $("#showtime{{ movie.id }}").val();
+        var typeSelect = $("#typeSelection{{ movie.id }} select, #id_type{{ movie.id }}");
+        var type = typeSelect.val();
+        var quantity = parseInt($("input[name='quantity{{ movie.id }}']").val()) || 1;
+        var user = "{{ user.id }}";
+        var selectedSeatIds = $(".seat.selected").map(function() {
+            return $(this).data("seat-id");
+        }).get();
+        
+        if (!showtimeId || !type) {
+            $("#bookingError{{ movie.id }}").html('<p class="text-danger">Vui lòng chọn suất chiếu và loại vé!</p>');
+            return;
+        }
+        
+        if (selectedSeatIds.length === 0) {
+            $("#bookingError{{ movie.id }}").html('<p class="text-danger">Vui lòng chọn ít nhất 1 ghế!</p>');
+            return;
+        }
+        
+        if (selectedSeatIds.length !== quantity) {
+            $("#bookingError{{ movie.id }}").html('<p class="text-danger">Số lượng ghế được chọn (' + selectedSeatIds.length + ') không khớp với số lượng vé (' + quantity + ')!</p>');
+            return;
+        }
+        
+        $("#bookingError{{ movie.id }}").empty();
+        
+        // Tạo data object với selected_seats[] để Django có thể nhận được
+        var formData = {
+            showtime_id: showtimeId,
+            type: type,
+            user: user,
+            movie_id: movie_id,
+            quantity: quantity,
+            csrfmiddlewaretoken: csrftoken,
+        };
+        
+        // Thêm selected_seats[] vào formData - jQuery với traditional: true sẽ tự động format đúng
+        formData['selected_seats[]'] = selectedSeatIds;
+        
+        $.ajax({
+            url: "{% url 'prepare_payment' %}",
+            type: "POST",
+            traditional: true, // Quan trọng: cho phép gửi array đúng cách với jQuery (selected_seats[]=1&selected_seats[]=2)
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    $("#bookingError{{ movie.id }}").html('<p class="text-success">Đang chuyển đến trang thanh toán...</p>');
+                    setTimeout(function() {
+                        window.location.href = response.redirect_url;
+                    }, 500);
+                } else {
+                    $("#bookingError{{ movie.id }}").html('<p class="text-danger">' + (response.message || 'Đặt vé thất bại! Vui lòng thử lại sau!') + '</p>');
+                }   
+            },
+            error: function(xhr, status, error) {
+                $("#bookingError{{ movie.id }}").html('<p class="text-danger">Lỗi kết nối! Vui lòng thử lại sau!</p>');
+            }
+        });
+    });
+});
+</script>

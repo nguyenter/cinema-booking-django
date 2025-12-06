@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+
+{% block content %}
+<link rel="stylesheet" href="../static/css/booking.css">
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card bg-secondary text-light">
+                <div class="card-header">
+                    <h3 class="text-center mb-0">Thanh Toán</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Thông tin đặt vé -->
+                    <div class="mb-4">
+                        <h5>Thông tin đặt vé:</h5>
+                        <table class="table table-dark table-striped">
+                            <tr>
+                                <td><strong>Phim:</strong></td>
+                                <td>{{ booking_data.movie_title }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phòng chiếu:</strong></td>
+                                <td>{{ booking_data.room_name }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Suất chiếu:</strong></td>
+                                <td id="showtime-display"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Loại vé:</strong></td>
+                                <td>{% if booking_data.type == 'Adult' %}Người lớn{% else %}Trẻ em{% endif %}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Số lượng vé:</strong></td>
+                                <td>{{ booking_data.quantity }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Giá vé:</strong></td>
+                                <td>{{ booking_data.price_per_ticket|floatformat:0|intcomma }} VNĐ</td>
+                            </tr>
+                            <tr class="table-info">
+                                <td><strong>Tổng tiền:</strong></td>
+                                <td><strong>{{ booking_data.total_amount|floatformat:0|intcomma }} VNĐ</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Form thanh toán -->
+                    <form method="POST" id="paymentForm">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="form-group mt-4">
+                            <label>Chọn phương thức thanh toán:</label>
+                            <select class="form-control" id="bankCode" name="bank_code">
+                                <option value="">Chọn ngân hàng (để trống để chọn sau)</option>
+                                <option value="VNBANK">Ngân hàng điện tử VNPAY</option>
+                                <option value="INTCARD">Thẻ quốc tế</option>
+                                <option value="VISA">Thẻ Visa</option>
+                                <option value="MASTERCARD">Thẻ Mastercard</option>
+                                <option value="JCB">Thẻ JCB</option>
+                                <option value="UPI">Ví điện tử UPI</option>
+                                <option value="VIB">Ngân hàng VIB</option>
+                                <option value="VIETCOMBANK">Ngân hàng Vietcombank</option>
+                                <option value="VIETINBANK">Ngân hàng Vietinbank</option>
+                                <option value="BIDV">Ngân hàng BIDV</option>
+                                <option value="AGRIBANK">Ngân hàng Agribank</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-primary btn-lg btn-block">
+                                Thanh toán qua VNPay
+                            </button>
+                            <a href="{% url 'movie_list' %}" class="btn btn-secondary btn-lg btn-block mt-2">
+                                Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Hiển thị thời gian suất chiếu
+    var showtimeStart = '{{ booking_data.showtime_start }}';
+    if (showtimeStart) {
+        var date = new Date(showtimeStart);
+        var formattedDate = date.toLocaleDateString('vi-VN') + ' ' + 
+                           date.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+        $('#showtime-display').text(formattedDate);
+    }
+    
+    // Cập nhật bank_code vào hidden field khi chọn
+    $('#bankCode').change(function() {
+        $('#id_bank_code').val($(this).val());
+    });
+});
+</script>
+{% endblock %}
+
