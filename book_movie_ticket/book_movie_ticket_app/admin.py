@@ -159,6 +159,7 @@ class ShowtimeAdmin(admin.ModelAdmin):
         booked = obj.get_booked_seats_count()
         total = obj.room.capacity
         percentage = (booked / total * 100) if total > 0 else 0
+        percentage_formatted = f'{percentage:.1f}'
         
         return format_html(
             '<div style="margin-top: 10px;">'
@@ -166,10 +167,10 @@ class ShowtimeAdmin(admin.ModelAdmin):
             '<div style="background: linear-gradient(90deg, #48bb78 0%, #38a169 100%); height: 100%; width: {}%; transition: width 0.3s;"></div>'
             '</div>'
             '<div style="margin-top: 5px; font-size: 12px; color: #6c757d;">'
-            'Đã đặt: <strong>{}</strong> / Tổng: <strong>{}</strong> ({:.1f}%)'
+            'Đã đặt: <strong>{}</strong> / Tổng: <strong>{}</strong> ({}%)'
             '</div>'
             '</div>',
-            percentage, booked, total, percentage
+            percentage, booked, total, percentage_formatted
         )
     get_seats_info.short_description = 'Biểu đồ ghế'
     
@@ -194,10 +195,11 @@ class RoomAdmin(admin.ModelAdmin):
         total = Seat.objects.filter(room=obj).count()
         if total > 0:
             percentage = (available / total * 100)
+            percentage_formatted = f'{percentage:.1f}'
             color = '#48bb78' if percentage > 50 else '#ed8936' if percentage > 20 else '#f56565'
             return format_html(
-                '<span style="color: {}; font-weight: 600;">{} / {} ({:.1f}%)</span>',
-                color, available, total, percentage
+                '<span style="color: {}; font-weight: 600;">{} / {} ({}%)</span>',
+                color, available, total, percentage_formatted
             )
         return "0"
     get_available_seats_count.short_description = 'Ghế còn trống'
@@ -222,9 +224,10 @@ class TicketAdmin(admin.ModelAdmin):
     
     def get_price_formatted(self, obj):
         if obj.price:
+            price_formatted = f'{obj.price:,}'
             return format_html(
-                '<span style="color: #48bb78; font-weight: 600; font-size: 16px;">{:,} VNĐ</span>',
-                obj.price
+                '<span style="color: #48bb78; font-weight: 600; font-size: 16px;">{} VNĐ</span>',
+                price_formatted
             )
         return "-"
     get_price_formatted.short_description = 'Giá (đã định dạng)'

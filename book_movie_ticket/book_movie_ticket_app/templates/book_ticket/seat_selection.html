@@ -1,11 +1,27 @@
+{% load seat_filters %}
+{% if error %}
+<p class="text-danger">Lỗi: {{ error }}</p>
+{% else %}
 {% for seat in seats %}
+  {% if forloop.counter0|divisibleby:15 %}
+    {% if not forloop.first %}
+      </div>
+    {% endif %}
+    <div class="row seats {{ forloop.counter0|get_row_class }}">
+  {% endif %}
   {% if seat.id in booked_seat_ids %}
   <div class="seat occupied" data-seat-id="" style="cursor: not-allowed;">
-    <span class="seat-number">{{ seat.room.name }}{% if seat.seat_number < 10 %}0{% endif %}{{ seat.seat_number }}</span>
+    <span class="seat-number">{{ forloop.counter0|get_seat_label }}</span>
   </div>
   {% else %}
   <div class="seat" data-seat-id="{{ seat.id }}">
-    <span class="seat-number">{{ seat.room.name }}{% if seat.seat_number < 10 %}0{% endif %}{{ seat.seat_number }}</span>
+    <span class="seat-number">{{ forloop.counter0|get_seat_label }}</span>
   </div>
   {% endif %}
+  {% if forloop.last %}
+    </div>
+  {% elif forloop.counter|divisibleby:15 %}
+    </div>
+  {% endif %}
 {% endfor %}
+{% endif %}

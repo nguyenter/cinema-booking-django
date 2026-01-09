@@ -2,13 +2,24 @@
 
 * {
     box-sizing: border-box;
-  }
+}
 
+/* Modal settings */
+.modal-xl {
+    max-width: 95%;
+}
+
+.modal-body {
+    overflow-x: visible;
+    padding: 1rem;
+}
+
+/* Seat chart container */
 .seat-chart {
     background-color: #242333;
     display: flex;
     flex-direction: column;
-    color : white;
+    color: white;
     align-items: center;
     justify-content: center;
     font-family: 'Lato', sans-serif;
@@ -17,6 +28,7 @@
     margin-left: 15%;
     margin-right: 15%;
 }
+
 .screen {
     background-color: #fff;
     height: 120px;
@@ -56,11 +68,11 @@
     margin: 5px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    position: relative; 
+    position: relative;
 }
 
 .seat.selected {
-    background-color: #4db662 ;
+    background-color: #4db662;
 }
 
 .seat.occupied {
@@ -73,11 +85,11 @@
 }
 
 .seat .seat-number {
-    position: absolute; 
-    top: 50%; 
-    left: 50%; 
-    transform: translate(-50%, -50%); 
-    color: white; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
     font-size: 12px;
 }
 
@@ -87,26 +99,26 @@
 }
 
 .showcase {
-background-color: rgba(0, 0, 0, 0.1);
-padding: 5px 10px;
-border-radius: 5px;
-color: #ffffff;
-list-style-type: none;
-display: flex;
-justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #ffffff;
+    list-style-type: none;
+    display: flex;
+    justify-content: space-between;
 }
 
 .showcase li {
-display: flex;
-align-items: center;
-justify-content: center;
-margin: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 10px;
 }
 
 .showcase li small {
-margin-left: 10px;
+    margin-left: 10px;
 }
-  
+
 .case {
     background-color: #950927;
     height: 30px;
@@ -114,11 +126,11 @@ margin-left: 10px;
     margin: 5px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    position: relative; 
+    position: relative;
 }
 
 .case.selected {
-    background-color: #4db662 ;
+    background-color: #4db662;
 }
 
 .case.occupied {
@@ -126,7 +138,6 @@ margin-left: 10px;
 }
 
 /* Movie Lists */
-
 .card {
     background-color: #fff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -134,12 +145,21 @@ margin-left: 10px;
     transition: all 0.2s ease-in-out;
     font-family: 'MuseoModerno', cursive;
 }
+
 .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+.card-header {
+    padding: 1rem 1.5rem;
+    font-size: 1.25rem;
+    color: #fff;
+    background-color: #343a40;
+}
+
 .card-body {
-    color : #000;
+    color: #000;
     background-color: #f8f9fa;
 }
 
@@ -147,4 +167,136 @@ margin-left: 10px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+/* Ticket Container */
+.container.ticket-container {
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+/* Table Styles */
+.table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-top: 1px solid #dee2e6;
+    text-align: center;
+}
+
+/* Pagination Styles */
+.page-item.active .page-link {
+    color: #ffffff;
+    background-color: #343a40;
+    border-color: #343a40;
+}
+
+.page-link {
+    color: #343a40;
+}
+
+.page-link:hover {
+    color: #ffffff;
+    background-color: #343a40;
+    border-color: #343a40;
+}
+
+.page-link:focus {
+    box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    cursor: auto;
+    background-color: #ffffff;
+    border-color: #ffffff;
+}
+
+/* DataTables Styles */
+.dataTables_length .custom-select {
+    background-color: #ffffff;
+    border-color: #343a40;
+    margin-top: 2px;
+}
+
+.dataTables_length .custom-select:hover {
+    background-color: #ffffff;
+    border-color: #343a40;
+}
+
+.dataTables_length .custom-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 255);
+}
+
+.dataTables_filter .form-control {
+    background-color: #ffffff;
+    border-color: #343a40;
+    margin-right: 100px;
+    margin-top: 2px;
+}
+
+.dataTables_filter .form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 255);
+}
+
+.dataTables_info {
+    color: #343a40;
+    margin-top: 2px;
+}
+
+table-responsive.dataTable thead .sorting:after,
+table-responsive.dataTable thead .sorting:before,
+table-responsive.dataTable thead .sorting_asc:after,
+table-responsive.dataTable thead .sorting_asc:before,
+table-responsive.dataTable thead .sorting_asc_disabled:after,
+table-responsive.dataTable thead .sorting_asc_disabled:before,
+table-responsive.dataTable thead .sorting_desc:after,
+table-responsive.dataTable thead .sorting_desc:before,
+table-responsive.dataTable thead .sorting_desc_disabled:after,
+table-responsive.dataTable thead .sorting_desc_disabled:before {
+    bottom: 0.5em;
+}
+
+.dataTables_wrapper table.dataTable td,
+.dataTables_wrapper table.dataTable th {
+    text-align: center;
+    font-family: "Source Code Pro", monospace;
+    vertical-align: middle;
+}
+
+/* Link Styles */
+.a-td {
+    color: #343a40;
+    text-decoration: none;
+}
+
+.a-td:hover {
+    color: #343a40;
+    text-decoration: none;
+}
+
+/* Checkbox Styles */
+.checkbox-large {
+    transform: scale(1.5);
+}
+
+.checkbox-large:checked {
+    background-color: #343a40;
+}
+
+.checkbox-large:checked:after {
+    color: #343a40;
+}
+
+/* Caption Styles */
+caption {
+    caption-side: top;
+    text-align: right;
+    color: #343a40;
 }

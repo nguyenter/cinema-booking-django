@@ -43,7 +43,7 @@
                 <td>{{ ticket.movie.title }}</td>
                 <td>{{ ticket.date_time }}</td>
                 <td>{{ ticket.room.name }}</td>
-                <td>{{ ticket.room.name }}{% if ticket.seat.seat_number < 10 %}0{% endif %}{{ ticket.seat.seat_number }}</td>
+                <td>{{ ticket.seat.seat_number }}</td>
                 <td>
                   {% if ticket.type == 'Adult' %}Người Lớn{% else %}Trẻ Em{% endif %}
                 </td>

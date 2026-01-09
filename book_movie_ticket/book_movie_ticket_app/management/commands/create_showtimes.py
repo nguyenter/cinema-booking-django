@@ -67,8 +67,27 @@ class Command(BaseCommand):
                 room = random.choice(rooms)
                 
                 # Chọn ngẫu nhiên một ngày trong tương lai
-                days_ahead = random.randint(0, days)
-                target_date = timezone.now().date() + timedelta(days=days_ahead)
+                # Đảm bảo ngày chiếu không sớm hơn ngày công chiếu của phim
+                today = timezone.now().date()
+                release_date = movie.release_date
+                
+                # Ngày sớm nhất có thể chiếu = max(today, release_date)
+                earliest_date = max(today, release_date)
+                
+                # Tính số ngày từ ngày sớm nhất đến ngày muộn nhất
+                latest_date = today + timedelta(days=days)
+                if latest_date < earliest_date:
+                    # Nếu ngày công chiếu quá xa trong tương lai, bỏ qua
+                    skipped_count += 1
+                    continue
+                
+                days_range = (latest_date - earliest_date).days
+                if days_range < 0:
+                    skipped_count += 1
+                    continue
+                    
+                days_ahead = random.randint(0, days_range)
+                target_date = earliest_date + timedelta(days=days_ahead)
                 
                 # Chọn ngẫu nhiên một khung giờ
                 time_slot = random.choice(time_slots)

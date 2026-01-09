@@ -38,6 +38,7 @@ urlpatterns = [
     path('lay-ghe/', views.get_seats, name='get_seats'),
     path('dat-ve-phim/', views.prepare_payment, name='prepare_payment'),
     path('payment/', views.payment, name='payment'),
+    path('cash-payment/', views.cash_payment, name='cash_payment'),
     path('payment-return/', views.payment_return, name='payment_return'),
     path('payment-ipn/', views.payment_ipn, name='payment_ipn'),  # IPN URL cho VNPay
     path('user-booking/', views.user_booking, name='user_booking'),

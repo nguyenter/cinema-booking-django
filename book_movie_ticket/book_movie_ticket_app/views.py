@@ -144,7 +144,14 @@ def get_seats(request):
             'showtime': showtime
         })
     except Exception as e:
-        return render(request, 'book_ticket/seat_selection.html', {'seats': [], 'booked_seat_ids': []})
+        import traceback
+        print(f"Error in get_seats: {str(e)}")
+        print(traceback.format_exc())
+        return render(request, 'book_ticket/seat_selection.html', {
+            'seats': [], 
+            'booked_seat_ids': [],
+            'error': str(e)
+        })
 
 @login_required
 def prepare_payment(request):
@@ -221,6 +228,14 @@ def payment(request):
     if not booking_data:
         messages.error(request, 'Không tìm thấy thông tin đặt vé. Vui lòng đặt lại.')
         return redirect('movie_list')
+    
+    # Lấy thông tin showtime để hiển thị
+    try:
+        showtime = get_object_or_404(Showtime, id=booking_data.get('showtime_id'))
+        booking_data['showtime_display'] = showtime.start_time.strftime('%d/%m/%Y %H:%M')
+    except Exception as e:
+        print(f"Error getting showtime: {e}")
+        booking_data['showtime_display'] = 'N/A'
     
     if request.method == 'POST':
         form = PaymentForm(request.POST)
@@ -301,6 +316,66 @@ def payment(request):
         'title': 'Thanh toán'
     }
     return render(request, 'payment.html', context)
+
+
+@login_required
+def cash_payment(request):
+    """Xử lý thanh toán bằng tiền mặt"""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+    booking_data = request.session.get('booking_data')
+    
+    if not booking_data:
+        return JsonResponse({'status': 'error', 'message': 'Không tìm thấy thông tin đặt vé. Vui lòng đặt lại.'})
+    
+    try:
+        # Tạo vé trực tiếp
+        showtime = get_object_or_404(Showtime, id=booking_data['showtime_id'])
+        movie = get_object_or_404(Movie, id=booking_data['movie_id'])
+        room = get_object_or_404(Room, id=booking_data['room_id'])
+        user = request.user
+        
+        tickets = []
+        for seat_id in booking_data['selected_seats']:
+            seat = get_object_or_404(Seat, id=seat_id)
+            # Kiểm tra lại lần nữa
+            if Ticket.objects.filter(showtime=showtime, seat=seat).exists():
+                continue
+            
+            ticket = Ticket(
+                movie=movie,
+                user=user,
+                room=room,
+                seat=seat,
+                showtime=showtime,
+                price=booking_data['price_per_ticket'],
+                type=booking_data['type'],
+                date_time=showtime.start_time,
+            )
+            tickets.append(ticket)
+        
+        if tickets:
+            # Lưu vé vào database
+            Ticket.objects.bulk_create(tickets)
+            
+            # Xóa booking_data khỏi session
+            if 'booking_data' in request.session:
+                del request.session['booking_data']
+            if 'order_id' in request.session:
+                del request.session['order_id']
+            request.session.save()  # Đảm bảo session được lưu
+            
+            messages.success(request, f'Đặt vé thành công! Đã đặt {len(tickets)} vé. Vui lòng thanh toán bằng tiền mặt tại quầy rạp khi đến xem phim.')
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Đặt vé thành công! Đã đặt {len(tickets)} vé. Vui lòng thanh toán bằng tiền mặt tại quầy rạp khi đến xem phim.',
+                'redirect_url': '/trang-chu/'
+            })
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Không thể tạo vé. Vui lòng liên hệ hỗ trợ.'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Lỗi khi tạo vé: {str(e)}'})
 
 
 @login_required

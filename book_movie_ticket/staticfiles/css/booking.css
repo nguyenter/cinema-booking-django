@@ -1,0 +1,213 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+/* Đảm bảo modal đủ rộng cho 15 ghế mỗi hàng */
+.modal-xl {
+    max-width: 95% !important;
+}
+
+.modal-body {
+    overflow-x: visible !important;
+    padding: 1rem !important;
+}
+
+/* Override Bootstrap row class for seat rows */
+div.row.seats {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.seat-chart {
+    background-color: #242333;
+    display: flex;
+    flex-direction: column;
+    color : white;
+    align-items: center;
+    justify-content: flex-start;
+    font-family: 'Lato', sans-serif;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px auto !important;
+    padding: 20px 10px;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: visible;
+    overflow-y: visible;
+    box-sizing: border-box;
+    min-height: auto !important;
+    height: auto !important;
+}
+
+.screen {
+    background-color: #fff;
+    height: 120px;
+    width: 60%;
+    max-width: 800px;
+    transform: rotateX(-45deg);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid #000;
+    border-bottom: 3px solid #000;
+    border-right: 3px solid #000;
+    border-left: 3px solid #000;
+    border-top: 3px solid #000;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+    margin: 20px auto 30px auto;
+}
+
+.row.seats {
+    margin: 4px 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 2px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+    clear: both !important;
+    flex: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 40px !important;
+    flex-basis: auto !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+}
+
+.row.seats.row-green .seat {
+    border: 2px solid #4CAF50 !important;
+}
+
+.row.seats.row-red .seat {
+    border: 2px solid #f44336 !important;
+}
+
+.seat {
+    background-color: #950927;
+    height: 32px;
+    width: calc((100% - 28px) / 15) !important;
+    min-width: calc((100% - 28px) / 15) !important;
+    max-width: calc((100% - 28px) / 15) !important;
+    margin: 0 !important;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    position: relative;
+    flex: 0 0 calc((100% - 28px) / 15) !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box !important;
+    float: none !important;
+    border: 2px solid transparent;
+}
+
+.seat.selected {
+    background-color: #4db662 ;
+}
+
+.seat.occupied {
+    background-color: #444451;
+}
+
+.seat:not(.occupied):hover {
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+.seat .seat-number {
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    color: white; 
+    font-size: 12px;
+}
+
+.showcase .seat:not(.occupied):hover {
+    cursor: default;
+    transform: scale(1);
+}
+
+.showcase {
+background-color: rgba(0, 0, 0, 0.1);
+padding: 5px 10px;
+border-radius: 5px;
+color: #ffffff;
+list-style-type: none;
+display: flex;
+justify-content: space-between;
+}
+
+.showcase li {
+display: flex;
+align-items: center;
+justify-content: center;
+margin: 0 10px;
+}
+
+.showcase li small {
+margin-left: 10px;
+}
+  
+.case {
+    background-color: #950927;
+    height: 30px;
+    width: 35px;
+    margin: 5px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    position: relative; 
+}
+
+.case.selected {
+    background-color: #4db662 ;
+}
+
+.case.occupied {
+    background-color: #444451;
+}
+
+/* Movie Lists */
+
+.card {
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    transition: all 0.2s ease-in-out;
+    font-family: 'MuseoModerno', cursive;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.card-body {
+    color : #000;
+    background-color: #f8f9fa;
+}
+
+.card-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

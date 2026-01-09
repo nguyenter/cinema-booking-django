@@ -1,6 +1,6 @@
 {% load crispy_forms_tags %}
 <div class="modal fade" id="bookingModal{{ movie.id }}" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl" style="max-width: 95%;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="bookingModalLabel">Đặt Vé Xem Phim</h5>
@@ -12,7 +12,7 @@
                 <!-- Biểu đồ chỗ ngồi -->
                 <div class="seat-chart">
                     <div class="screen"></div>
-                    <div class="row m-3 seats" id="seat-buttons{{ movie.id }}"></div>
+                    <div class="row seats" id="seat-buttons{{ movie.id }}"></div>
                     <ul class="showcase">
                         <li>
                           <div class="case"></div>

@@ -26,7 +26,15 @@
                             </tr>
                             <tr>
                                 <td><strong>Suất chiếu:</strong></td>
-                                <td id="showtime-display"></td>
+                                <td id="showtime-display">
+                                    {% if booking_data.showtime_display %}
+                                        {{ booking_data.showtime_display }}
+                                    {% elif booking_data.showtime_start %}
+                                        {{ booking_data.showtime_start|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
                             </tr>
                             <tr>
                                 <td><strong>Loại vé:</strong></td>
@@ -53,7 +61,21 @@
                         {{ form|crispy }}
                         
                         <div class="form-group mt-4">
-                            <label>Chọn phương thức thanh toán:</label>
+                            <label class="h5">Phương thức thanh toán:</label>
+                            <div class="btn-group-vertical btn-group-toggle w-100" data-toggle="buttons">
+                                <label class="btn btn-outline-primary active mb-2">
+                                    <input type="radio" name="payment_method" id="vnpay" value="vnpay" checked>
+                                    <i class="fas fa-credit-card"></i> Thanh toán qua VNPay
+                                </label>
+                                <label class="btn btn-outline-success mb-2">
+                                    <input type="radio" name="payment_method" id="cash" value="cash">
+                                    <i class="fas fa-money-bill-wave"></i> Thanh toán bằng tiền mặt
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="vnpay-options" class="form-group mt-3">
+                            <label>Chọn ngân hàng (tùy chọn):</label>
                             <select class="form-control" id="bankCode" name="bank_code">
                                 <option value="">Chọn ngân hàng (để trống để chọn sau)</option>
                                 <option value="VNBANK">Ngân hàng điện tử VNPAY</option>
@@ -70,12 +92,17 @@
                             </select>
                         </div>
                         
+                        <div id="cash-info" class="alert alert-info mt-3" style="display: none;">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Lưu ý:</strong> Bạn sẽ thanh toán bằng tiền mặt tại quầy rạp chiếu phim khi đến xem phim.
+                        </div>
+                        
                         <div class="form-group mt-3">
-                            <button type="submit" class="btn btn-primary btn-lg btn-block">
+                            <button type="submit" class="btn btn-primary btn-lg btn-block" id="submitBtn">
                                 Thanh toán qua VNPay
                             </button>
                             <a href="{% url 'movie_list' %}" class="btn btn-secondary btn-lg btn-block mt-2">
-                                Hủy
+                                <i class="fas fa-times"></i> Hủy
                             </a>
                         </div>
                     </form>
@@ -85,20 +112,107 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script>
 $(document).ready(function() {
     // Hiển thị thời gian suất chiếu
     var showtimeStart = '{{ booking_data.showtime_start }}';
-    if (showtimeStart) {
-        var date = new Date(showtimeStart);
-        var formattedDate = date.toLocaleDateString('vi-VN') + ' ' + 
-                           date.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
-        $('#showtime-display').text(formattedDate);
+    if (showtimeStart && showtimeStart !== 'None' && showtimeStart !== '') {
+        try {
+            // Nếu là ISO format
+            var date = new Date(showtimeStart);
+            if (!isNaN(date.getTime())) {
+                var formattedDate = date.toLocaleDateString('vi-VN') + ' ' + 
+                                   date.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+                $('#showtime-display').text(formattedDate);
+            }
+        } catch(e) {
+            console.log('Error parsing date:', e);
+        }
     }
     
     // Cập nhật bank_code vào hidden field khi chọn
     $('#bankCode').change(function() {
-        $('#id_bank_code').val($(this).val());
+        if ($('#id_bank_code').length) {
+            $('#id_bank_code').val($(this).val());
+        }
+    });
+    
+    // Xử lý thay đổi phương thức thanh toán
+    $('input[name="payment_method"]').change(function() {
+        var paymentMethod = $(this).val();
+        if (paymentMethod === 'cash') {
+            $('#vnpay-options').hide();
+            $('#cash-info').show();
+            $('#submitBtn').html('<i class="fas fa-money-bill-wave"></i> Xác nhận đặt vé (Thanh toán tiền mặt)');
+            $('#submitBtn').removeClass('btn-primary').addClass('btn-success');
+        } else {
+            $('#vnpay-options').show();
+            $('#cash-info').hide();
+            $('#submitBtn').html('Thanh toán qua VNPay');
+            $('#submitBtn').removeClass('btn-success').addClass('btn-primary');
+        }
+    });
+    
+    // Xử lý submit form
+    $('#paymentForm').on('submit', function(e) {
+        var paymentMethod = $('input[name="payment_method"]:checked').val();
+        console.log('Payment method:', paymentMethod);
+        
+        if (paymentMethod === 'cash') {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Xác nhận trước khi đặt vé
+            if (confirm('Bạn có chắc chắn muốn đặt vé và thanh toán bằng tiền mặt tại quầy không?')) {
+                // Disable button để tránh double submit
+                $('#submitBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...');
+                
+                // Gửi request đến cash_payment view
+                $.ajax({
+                    url: '{% url "cash_payment" %}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                    },
+                    data: {
+                        csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('Response:', response);
+                        if (response.status === 'success') {
+                            alert(response.message);
+                            // Redirect về trang chủ
+                            window.location.href = response.redirect_url || '/trang-chu/';
+                        } else {
+                            alert(response.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+                            $('#submitBtn').prop('disabled', false).html('<i class="fas fa-money-bill-wave"></i> Xác nhận đặt vé (Thanh toán tiền mặt)');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', xhr, status, error);
+                        var errorMsg = 'Có lỗi xảy ra. Vui lòng thử lại.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        } else if (xhr.responseText) {
+                            try {
+                                var errorData = JSON.parse(xhr.responseText);
+                                if (errorData.message) {
+                                    errorMsg = errorData.message;
+                                }
+                            } catch(e) {
+                                console.error('Error parsing response:', e);
+                            }
+                        }
+                        alert(errorMsg);
+                        $('#submitBtn').prop('disabled', false).html('<i class="fas fa-money-bill-wave"></i> Xác nhận đặt vé (Thanh toán tiền mặt)');
+                    }
+                });
+            }
+            return false;
+        }
+        // Nếu là VNPay, form sẽ submit bình thường
     });
 });
 </script>
