@@ -19,7 +19,7 @@ Dự án "Đặt Vé Xem Phim Online" là một ứng dụng web đơn giản đ
 1. Clone repository:
 
 ```bash
-git clone https://github.com/ptthanh02/Simple_Movie_Booking_Django.git
+git clone https://github.com/nguyenter/cinema-booking-django.git
 ```
 
 2. Cài đặt môi trường ảo:
